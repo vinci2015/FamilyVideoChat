@@ -1,0 +1,43 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+
+    defaultConfig {
+        applicationId "com.example.huangyouqiang.familyvideochat"
+        minSdkVersion 19
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    testCompile 'junit:junit:4.12'
+    compile files('libs/beacon_android_v1.9.9.jar')
+    compile files('libs/bugly_1.2.8_imsdk_release.jar')
+    compile files('libs/eup_1.9.2__allproguad_rqdp.jar')
+    compile files('libs/httpmime-4.1.1.jar')
+    compile files('libs/imsdk.jar')
+    compile files('libs/libamm_sdk.jar')
+    compile files('libs/mobilepb.jar')
+    compile files('libs/mta-sdk.jar')
+    compile files('libs/open_sdk.jar')
+    compile files('libs/qalsdk.jar')
+    compile files('libs/qavsdk.jar')
+    compile files('libs/tls_sdk.jar')
+    compile files('libs/wup-1.0.0-SNAPSHOT.jar')
+    compile 'com.android.support:appcompat-v7:23.2.1'
+    compile 'com.android.support:design:23.2.1'
+    compile 'com.jakewharton:butterknife:5.1.1'
+    compile 'com.android.support:support-v4:23.2.1'
+    compile 'com.android.support:cardview-v7:23.2.1'
+}

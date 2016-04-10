@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/FamilyVideoChat.iml" filepath="$PROJECT_DIR$/FamilyVideoChat.iml" />
+      <module fileurl="file://$PROJECT_DIR$/FamilyVideoChat/FamilyVideoChat-FamilyVideoChat.iml" filepath="$PROJECT_DIR$/FamilyVideoChat/FamilyVideoChat-FamilyVideoChat.iml" />
+    </modules>
+  </component>
+</project>
