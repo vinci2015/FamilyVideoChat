@@ -1,12 +1,5 @@
 package com.example.huangyouqiang.familyvideochat.avsdk.control;
 
-//test
-/*
-import java.io.DataOutputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-*/
 
 import android.content.Context;
 import android.content.Intent;

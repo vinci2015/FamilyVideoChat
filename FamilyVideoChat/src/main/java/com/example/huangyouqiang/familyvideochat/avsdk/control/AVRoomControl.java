@@ -165,7 +165,7 @@ class AVRoomControl {
 					break;
 				}
 			}
-	
+	//新增加一个info
 			if (!bAudioAndCameraMemberDelete && !bAudioAndCameraMemberExist) 
 			{
 				MemberInfo info = new MemberInfo();
