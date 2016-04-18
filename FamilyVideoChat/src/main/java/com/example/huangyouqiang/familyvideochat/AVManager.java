@@ -1,11 +1,14 @@
 package com.example.huangyouqiang.familyvideochat;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.huangyouqiang.familyvideochat.avsdk.Util;
 import com.example.huangyouqiang.familyvideochat.avsdk.control.QavsdkControl;
+import com.example.huangyouqiang.familyvideochat.common.ResultMessageListener;
 import com.example.huangyouqiang.familyvideochat.ui.AndroidApplication;
 import com.tencent.TIMConversation;
 import com.tencent.TIMConversationType;
@@ -98,13 +101,14 @@ public class AVManager implements AVChatStartContextCallBack{
 	 * 视频邀请
 	 * 返回0表示正常，返回以表示失败
 	 */
-	public int invite(String mReceiveIdentifier,final int relationId){
+	public int invite(String mReceiveIdentifier, final int relationId, final ResultMessageListener listener){
 	//	mQavsdkControl.invite(mReceiveIdentifier, isVideo);
 		Log.i(TAG, "invite()"+ mReceiveIdentifier);
 		if(mReceiveIdentifier.equals(LocalSaveManager.getInstance(AndroidApplication.getContext()).getAccountUserId())){
 			Log.d(TAG, "不能邀请自己");
 			return 1;
 		}
+		setPeerId(mReceiveIdentifier);
 		conversation = TIMManager.getInstance().getConversation(TIMConversationType.C2C, mReceiveIdentifier);
 		TIMMessage message = new TIMMessage();
 		TIMTextElem  elemCommand = new TIMTextElem();
@@ -122,13 +126,14 @@ public class AVManager implements AVChatStartContextCallBack{
 				if(!isInRoom){
 					//邀请信息送达至对方后，先行进入视频房间中
 					enterRoom(relationId,LocalSaveManager.getInstance(AndroidApplication.getContext()).getAccountUserId());
+					listener.onResult(true,"invite message is arrived");
 				}
 			}
 			
 			@Override
 			public void onError(int code, String desc) {
 				Log.e(TAG, "fail to send invite, code : "+code+" desc :"+desc);
-				Toast.makeText(context, "邀请失败,对方账号未登录或不存在", Toast.LENGTH_LONG).show();
+				listener.onResult(false,"邀请失败,对方账号未登录或不存在");
 			}
 		});
 		return 0;
@@ -202,6 +207,9 @@ public class AVManager implements AVChatStartContextCallBack{
 	private void enterRoom(int relationId,String roomRole){
 		Log.i(TAG, "enter room---getRoom :"+mQavsdkControl.getAVContext().getRoom());
 		if(mQavsdkControl.getAVContext().getRoom()== null){//同一时间只能创建一个视频房间
+			if ((mQavsdkControl != null) && (mQavsdkControl.getAVContext() != null) && (mQavsdkControl.getAVContext().getAudioCtrl() != null)) {
+				mQavsdkControl.getAVContext().getAudioCtrl().startTRAEService();
+			}
 			mQavsdkControl.enterRoom(relationId,roomRole);
 		}
 		setRoomId(relationId);
@@ -212,7 +220,8 @@ public class AVManager implements AVChatStartContextCallBack{
 	}
 	
 
-	public int startAVChatContext(AVChatStartContextCallBack mCallBack){
+	public int init(){
+		initSdk();
 		String userid = LocalSaveManager.getInstance(AndroidApplication.getContext()).getAccountUserId();
 		return mQavsdkControl.startContext(userid
 						,LocalSaveManager.getInstance(AndroidApplication.getContext()).getAccountUserSig(userid),this);
@@ -251,6 +260,9 @@ public class AVManager implements AVChatStartContextCallBack{
 	public boolean getIsInCloseRoom(){
 		return mQavsdkControl.getIsInCloseRoom();
 	}
+	public boolean getIsInEnterRoom(){
+		return mQavsdkControl.getIsInEnterRoom();
+	}
 	/*
 	 * 退出房间，相当于结束会话
 	 */
@@ -259,12 +271,10 @@ public class AVManager implements AVChatStartContextCallBack{
 	}
 	/**
 	 * 接受视频邀请或者接受监控请求
-	 * @param receiverId 对方id
-	 * @param relationId 房间id
 	 */
-	public void accept(String receiverId,final int relationId){
+	public void accept(){
 		//mQavsdkControl.accept();
-		conversation = TIMManager.getInstance().getConversation(TIMConversationType.C2C, receiverId);
+		conversation = TIMManager.getInstance().getConversation(TIMConversationType.C2C, getPeerId());
 		TIMMessage message = new TIMMessage();
 		TIMTextElem  elemCommand = new TIMTextElem();
 		elemCommand.setText("2");
@@ -277,7 +287,7 @@ public class AVManager implements AVChatStartContextCallBack{
 			@Override
 			public void onSuccess(TIMMessage arg0) {
 				Log.i(TAG, "send accept message successful");
-				enterRoom(relationId,LocalSaveManager.getInstance(AndroidApplication.getContext()).getAccountUserId());
+				enterRoom(getRoomId(),LocalSaveManager.getInstance(AndroidApplication.getContext()).getAccountUserId());
 			}
 			
 			@Override
@@ -289,12 +299,11 @@ public class AVManager implements AVChatStartContextCallBack{
 	}
 	/**
 	 * 拒绝视频邀请
-	 * @param receiverId 对方id
 	 */
-	public void refuse(String receiverId){
+	public void refuse(){
 		//mQavsdkControl.refuse();
 		Log.i(TAG, "refuse");
-		conversation = TIMManager.getInstance().getConversation(TIMConversationType.C2C, receiverId);
+		conversation = TIMManager.getInstance().getConversation(TIMConversationType.C2C, getPeerId());
 		TIMMessage message = new TIMMessage();
 		TIMTextElem  elemCommand = new TIMTextElem();
 		elemCommand.setText("1");
@@ -402,9 +411,9 @@ public class AVManager implements AVChatStartContextCallBack{
 	//	MyActivityManager.getInstance().clearActivity("AvActivity");
 	}
 	//请求某人德尔画面
-	public void requestRemoteView(String identifier){
+	/*public void requestRemoteView(String identifier){
 		mQavsdkControl.requestRemoteView(identifier);
-	}
+	}*/
 	//设置网络类型
 	public void setNetType(int netType){
 		mQavsdkControl.setNetType(netType);
@@ -412,7 +421,7 @@ public class AVManager implements AVChatStartContextCallBack{
 
 	//远端是否有视频
 	public void setRemoteHasVideo(boolean hasVideo,String peerId){
-		mQavsdkControl.setRemoteHasVideo(hasVideo, peerId, AVView.VIDEO_SRC_TYPE_CAMERA);
+		mQavsdkControl.setRemoteHasVideo(peerId, AVView.VIDEO_SRC_TYPE_CAMERA,hasVideo);
 	}
 	/*
 	 * 开启或关闭麦克风
@@ -638,7 +647,11 @@ public class AVManager implements AVChatStartContextCallBack{
 	}
 	public String getSelfId(){return mQavsdkControl.getSelfIdentifier();}
 	public String getPeerId(){
-		return mQavsdkControl.getPeerIdentifier();
+		Log.e(TAG,"getpeer");
+		if(mQavsdkControl != null) {
+			return mQavsdkControl.getPeerIdentifier();
+		}
+		return null;
 	}
 	/**
 	 * 设置要通信的对方的id
@@ -673,46 +686,67 @@ public class AVManager implements AVChatStartContextCallBack{
 	*/
 	@Override
 	public void onReceiveInvite(String peerId, int roomId) {
-
+		if(getIsInRoom()){
+			conflict(peerId);
+			return;
+		}
+		setPeerId(peerId);
+		setRoomId(roomId);
+		Intent intent = new Intent(Util.ACTION_RECV_INVITE);
+		context.sendStickyBroadcast(intent);
 	}
 
 	@Override
 	public void onReceiveRefuse(String peerId) {
-
+		Intent intent = new Intent(Util.ACTION_REFUSE_COMPLETE);
+		context.sendBroadcast(intent);
 	}
 
 	@Override
 	public void onReceiveAccept(String peerId) {
-
+		setPeerId(peerId);
+		Intent intent = new Intent(Util.ACTION_ACCEPT_COMPLETE);
+		context.sendBroadcast(intent);
 	}
 
 	@Override
 	public void onReceiveHangUp(String peerId) {
-
+		Intent intent = new Intent(Util.ACTION_CHAT_HANGUP);
+		context.sendBroadcast(intent);
 	}
 
 	@Override
 	public void onReceiveConflict(String peerId) {
-
+		Intent intent = new Intent(Util.ACTION_INVITE_CONFLICT);
+		context.sendStickyBroadcast(intent);
+		Log.d(TAG, "receive conflict()");
 	}
 
 	@Override
 	public void onReceiveInviteCancel(String peerId) {
-
+		Intent intent = new Intent(Util.ACTION_INVITE_CANCELED);
+		context.sendBroadcast(intent);
 	}
 
 	@Override
 	public void onReceiveMonitor(String peerId, int roomId) {
-
+		if(getIsInRoom()){
+			conflict(peerId);
+			return;
+		}
+		setPeerId(peerId);
+		setRoomId(roomId);
+		Intent intent  = new Intent(Util.ACTION_RECEIVE_MONITOR);
+		context.sendStickyBroadcast(intent);
 	}
 
 	@Override
 	public void onStartContextSuccessful() {
-
+		Log.i(TAG,"start context successful");
 	}
 
 	@Override
 	public void onStartContextFailed() {
-
+		Log.i(TAG,"start context failed");
 	}
 }

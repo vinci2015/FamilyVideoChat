@@ -101,7 +101,8 @@ class AVContextControl {
 			mConfig.identifier = identifier;
 			
 			mUserSig = usersig;			
-			login();
+	//		login();
+			startcontext();
 		}
 		
 		return result;
@@ -143,6 +144,7 @@ class AVContextControl {
 	}
 	
 	String getPeerIdentifier() {
+		Log.e(TAG,"getpeer");
 		return mPeerIdentifier;
 	}
 
@@ -196,7 +198,19 @@ class AVContextControl {
 		        }
 		      });
 	}
-	
+
+	private void startcontext(){
+		Log.d(TAG, "WL_DEBUG mConfig " + mConfig.identifier);
+		mAVContext = AVContext.createContext(mConfig);
+		Log.d(TAG, "WL_DEBUG startContext mAVContext is null? " + (mAVContext == null));
+		mSelfIdentifier = mConfig.identifier;
+		int ret = mAVContext.startContext(mContext, mStartContextCompleteCallback);
+		if(ret != AVError.AV_OK){
+			mContext.sendBroadcast(new Intent(Util.ACTION_START_CONTEXT_FAILED)
+							.putExtra(Util.EXTRA_AV_ERROR_RESULT, ret));
+		}
+		mIsInStartContext = true;
+	}
 	private void onLogin(boolean result, long tinyId)
 	{
 		if(result)

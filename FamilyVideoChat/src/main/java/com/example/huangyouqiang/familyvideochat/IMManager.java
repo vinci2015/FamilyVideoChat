@@ -105,21 +105,28 @@ public class IMManager {
 	}
 	public void login(final NavigationListener listener){
 		final LocalSaveManager saveManager =LocalSaveManager.getInstance(AndroidApplication.getContext());
+		if(saveManager.getAccountUserId() == ""){
+			Log.e(TAG,"login----account is null");
+			listener.onFail();
+			return;
+		}
 		if(mTlsHelper != null){
 			TLSUserInfo userInfo = mTlsHelper.getLastUserInfo();
 			boolean hasLogin = (userInfo != null && !mTlsHelper.needLogin(userInfo.identifier));
 			if(hasLogin){
 				mTlsHelper.TLSRefreshUserSig(userInfo.identifier,refreshSigListener);
 			}else{
+				Log.e(TAG,"login---need login");
 					listener.onFail();
 					saveManager.clearAccountInfo();
+					return;
 			}
 		}
 		final String userId = saveManager.getAccountUserId();
 		mTIMManager.login(userId, saveManager.getAccountUserSig(userId), new TIMCallBack() {
 			@Override
 			public void onError(int i, String s) {
-				Log.e(TAG,"login erro"+s);
+				Log.e(TAG,"login---error"+s);
 				listener.onFail();
 				saveManager.setAccountInfo(userId,"");
 			}

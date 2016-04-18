@@ -20,6 +20,15 @@
         android:layout_above="@id/tv_drawer_username"
         android:layout_marginBottom="16dp"
         android:src="@mipmap/ic_launcher"/>
-
+    <Button
+        android:id="@+id/btn_clear_account"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        style="@style/Base.Widget.AppCompat.Button"
+        android:padding="5dp"
+        android:text="Clear Account"
+        android:background="@drawable/button_bg"/>
 
 </RelativeLayout>

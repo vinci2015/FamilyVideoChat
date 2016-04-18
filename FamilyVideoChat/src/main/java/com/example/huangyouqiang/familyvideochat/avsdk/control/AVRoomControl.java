@@ -143,11 +143,13 @@ class AVRoomControl {
 				{
 					if (!endpoint.hasCameraVideo()) 
 					{
+						//在avendpointcontrol中的requestViewList中去除该view，requestIdList中去除该id
 						qavsdk.deleteRequestView(mAudioAndCameraMemberList.get(j).identifier, AVView.VIDEO_SRC_TYPE_CAMERA);
 					}
 
 					if(bAudioAndCameraMemberDelete)//delete
 					{
+						//no audio && no camera
 						mAudioAndCameraMemberList.remove(j);
 					}
 					else//modify info

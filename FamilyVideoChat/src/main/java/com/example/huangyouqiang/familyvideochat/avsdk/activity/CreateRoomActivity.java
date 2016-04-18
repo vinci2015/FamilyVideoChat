@@ -35,6 +35,11 @@ public class CreateRoomActivity extends Activity implements OnClickListener {
 	private static final int DIALOG_CLOSE_ROOM = DIALOG_CREATE_ROOM + 1;
 	private static final int DIALOG_CREATE_ROOM_ERROR = DIALOG_CLOSE_ROOM + 1;
 	private static final int DIALOG_CLOSE_ROOM_ERROR = DIALOG_CREATE_ROOM_ERROR + 1;
+
+	private static final int DIALOG_MODE_LIST = DIALOG_CLOSE_ROOM_ERROR + 1;
+	private static final int DIALOG_INVITE = DIALOG_MODE_LIST+1;
+	private static final int DIALOG_LOGIN = DIALOG_INVITE+1;
+	private static final int DIALOG_LOGIN_ERROR = DIALOG_LOGIN+1;
 	
 	private int mModeListIndex = -1;
 	private CheckBox isSupportMultiVideo;
@@ -46,8 +51,11 @@ public class CreateRoomActivity extends Activity implements OnClickListener {
 		
 	private int mCreateRoomErrorCode = AVError.AV_OK;
 	private int mCloseRoomErrorCode = AVError.AV_OK;
+	private int mLoginErrorCode = AVError.AV_OK;
 	private ProgressDialog mDialogCreateRoom = null;
 	private ProgressDialog mDialogCloseRoom = null;
+	private ProgressDialog mDialogLogin = null;
+	private AlertDialog mDialogInvite = null;
 	private QavsdkControl mQavsdkControl;
 	private String mSelfIdentifier = "";
 	private Context ctx;
@@ -99,6 +107,24 @@ public class CreateRoomActivity extends Activity implements OnClickListener {
 				}
 			} else if (action.equals(Util.ACTION_CLOSE_ROOM_COMPLETE)) {
 				refreshWaitingDialog();
+			} else if(action.equals(Util.ACTION_RECV_INVITE)){
+				Log.i(TAG, "broadcastReceiver-----recv invite");
+				removeStickyBroadcast(intent);
+				showDialog(DIALOG_INVITE);
+			}else if(action.equals(Util.ACTION_INVITE_CANCELED)){
+				if (mDialogInvite != null && mDialogInvite.isShowing()) {
+					Toast.makeText(getApplicationContext(), "对方取消",
+									Toast.LENGTH_LONG).show();
+					mDialogInvite.dismiss();
+				}
+
+			}else if(action.equals(Util.ACTION_CHAT_HANGUP)){
+				if (mDialogInvite != null && mDialogInvite.isShowing()) {
+					Toast.makeText(getApplicationContext(), "对方取消",
+									Toast.LENGTH_LONG).show();
+					mDialogInvite.dismiss();
+				}
+
 			}
 		}
 	};

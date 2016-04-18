@@ -120,8 +120,7 @@ public class MultiVideoMembersControlUI extends RelativeLayout {
 		if (Build.VERSION.SDK_INT >= 9) {
 			mMembersContainer.setOverScrollMode(View.OVER_SCROLL_NEVER);
 		}
-
-		mMembersContainer.setOnPageChangeListener(mOnPageChangeListener);
+		mMembersContainer.addOnPageChangeListener(mOnPageChangeListener);
 
 		mGridViewContainer = new ArrayList<GridView>();
 
@@ -788,8 +787,7 @@ public class MultiVideoMembersControlUI extends RelativeLayout {
 			for (int j = 0; j < i; j++) {
 				ImageView indicator = new ImageView(getContext());
 				indicator.setPadding(padding, padding, padding, padding);
-				indicator
-						.setImageResource(R.drawable.qav_gaudio_indicator_selector);
+				indicator.setImageResource(R.drawable.qav_gaudio_indicator_selector);
 				mPageIndicator.addView(indicator, count + j);
 			}
 		}

@@ -166,10 +166,26 @@ public class QavsdkControl {
 		if (mAVContextControl != null)
 			mAVContextControl.setTestEnvStatus(status);
 	}
-	
-	
-	
-	
+
+	public String getPeerIdentifier(){
+		if(mAVContextControl != null){
+			Log.e(TAG,"getpeer");
+			return mAVContextControl.getPeerIdentifier();
+		}
+		Log.e(TAG,"accontext = null");
+		return null;
+	}
+	public void setPeerId(String peerId){
+		mAVContextControl.setPeerIdentifier(peerId);
+	}
+
+/*	public void requestRemoteView(String identifier) {
+		if (mAVEndpointControl == null) {
+			return;
+		}
+		mAVEndpointControl.requestRemoteView(identifier);
+	}*/
+
 	public boolean setIsInStopContext(boolean isInStopContext) {
 		if (mAVContextControl == null)
 			return false;
@@ -257,9 +273,9 @@ public class QavsdkControl {
 			mAVUIControl.setLocalHasVideo(isLocalHasVideo, false, selfIdentifier);
 		}
 	}
-	public void setRemoteHasVideo(boolean isRemoteHasVideo, String identifier, int videoSrcType) {
+	public void setRemoteHasVideo(boolean isRemoteHasVideo, String identifier) {
 		if (null != mAVUIControl) {
-			mAVUIControl.setSmallVideoViewLayout(isRemoteHasVideo, identifier, videoSrcType);
+			mAVUIControl.setSmallVideoViewLayout(isRemoteHasVideo, identifier, true);
 		}
 	}
 	public void setSelfId(String key) {

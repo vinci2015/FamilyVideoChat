@@ -256,7 +256,7 @@ public class AVUIControl extends GLViewGroup {
 				view.setVisibility(GLView.VISIBLE);
 			}
 			if (forceToBigView && index > 0) {
-				switchVideo(0, index);
+				switchVideo(0, index);//将对方画面切换到大换面
 			}
 		} else {// 关闭对方画面
 			int index = getViewIndexById(identifier, videoSrcType);		
@@ -430,7 +430,9 @@ public class AVUIControl extends GLViewGroup {
 		}
 		return count;
 	}
-
+	/*
+	 * 按顺序找到一个空的GLVIDEOVIEW，返回这个view的index,否则返回-1
+	 */
 	int getIdleViewIndex(int start) {
 		int index = -1;
 		for (int i = start; i < mGlVideoView.length; i++) {
@@ -442,7 +444,9 @@ public class AVUIControl extends GLViewGroup {
 		}
 		return index;
 	}
-
+	/*
+	 * 若找到与identifier匹配的打开的画面，返回index，否则返回-1
+	 */
 	int getViewIndexById(String identifier, int videoSrcType) {
 		int index = -1;
 		if (null == identifier) {
@@ -457,7 +461,11 @@ public class AVUIControl extends GLViewGroup {
 		}
 		return index;
 	}
-
+	/**
+	 * 设置自己与对方画面的大小方位
+	 * mGLVideoView[0] 处于全屏位置，即为大画面
+	 * @param virtical
+	 */
 	void layoutVideoView(boolean virtical) {
 		if (QLog.isColorLevel()) {
 			QLog.d(TAG, QLog.CLR, "layoutVideoView virtical: " + virtical);
@@ -465,7 +473,7 @@ public class AVUIControl extends GLViewGroup {
 		if (mContext == null)
 			return;
 
-		int width = getWidth();
+		int width = getWidth();///获取整个屏幕的宽度
 		int height = getHeight();
 		
 		Log.d(TAG, "width: " + getWidth() + "height: " + getHeight());
@@ -643,9 +651,9 @@ public class AVUIControl extends GLViewGroup {
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
         layoutParams.width = 1;
         layoutParams.height = 1;
-        layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-                | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+        layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE  //不能获得焦点，用户不能像window发送按键按钮事件
+                | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS //window大小不受限，可超出屏幕大小
+                | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN; //让window占满整个屏幕，不留边界
         // layoutParams.flags |= LayoutParams.FLAG_NOT_TOUCHABLE;
         layoutParams.format = PixelFormat.TRANSLUCENT;
         layoutParams.windowAnimations = 0;// android.R.style.Animation_Toast;
@@ -683,7 +691,9 @@ public class AVUIControl extends GLViewGroup {
             }
         }
 	}
-
+	/*
+	 * 将两个视频画面调换下位置
+	 */
 	void switchVideo(int index1, int index2) {
 		if (QLog.isColorLevel()) {
 			QLog.d(TAG, QLog.CLR, "switchVideo index1: " + index1 + ", index2: " + index2);
@@ -730,7 +740,7 @@ public class AVUIControl extends GLViewGroup {
 		final static int LEFT_BOTTOM = 4;
 	}
 
-	public void setSmallVideoViewLayout(boolean isRemoteHasVideo, String remoteIdentifier, int videoSrcType) {
+	public void setSmallVideoViewLayout(boolean isRemoteHasVideo, String remoteIdentifier,boolean isForceToBig) {
 		if (QLog.isColorLevel()) {
 			QLog.d(TAG, QLog.CLR, "setSmallVideoViewLayout position: " + mPosition);
 		}
@@ -793,7 +803,7 @@ public class AVUIControl extends GLViewGroup {
 		if (isRemoteHasVideo) {// 打开摄像头
 			GLVideoView view = null;
 			mRemoteIdentifier = remoteIdentifier;
-			int index = getViewIndexById(remoteIdentifier, videoSrcType);	
+			int index = getViewIndexById(remoteIdentifier, AVView.VIDEO_SRC_TYPE_CAMERA);
 			
 			//请求多路画面用这个测试
 //			if (remoteViewIndex != -1 && !mRemoteIdentifier.equals("") && !mRemoteIdentifier.equals(remoteIdentifier)) {
@@ -809,7 +819,7 @@ public class AVUIControl extends GLViewGroup {
 				index = getIdleViewIndex(0);					
 				if (index >= 0) {
 					view = mGlVideoView[index];
-					view.setRender(remoteIdentifier, videoSrcType);
+					view.setRender(remoteIdentifier,  AVView.VIDEO_SRC_TYPE_CAMERA);
 					remoteViewIndex = index;
 				}
 			} else {
@@ -820,9 +830,11 @@ public class AVUIControl extends GLViewGroup {
 				view.enableLoading(false);
 				view.setVisibility(GLView.VISIBLE);
 			}
-
+			if(isForceToBig && index>0){
+				switchVideo(0, index);//将此view与大画面对换位置，使得对方画面在大画面中
+			}
 		} else {// 关闭摄像头
-			int index = getViewIndexById(remoteIdentifier, videoSrcType);			
+			int index = getViewIndexById(remoteIdentifier,  AVView.VIDEO_SRC_TYPE_CAMERA);
 			if (index >= 0) {
 				closeVideoView(index);
 				remoteViewIndex = -1;
@@ -1220,6 +1232,7 @@ public class AVUIControl extends GLViewGroup {
 				Log.d(TAG, "WL_DEBUG onMemberChange memberInfo.hasCameraVideo = " + memberInfo.hasCameraVideo);
 
 				if (!memberInfo.hasCameraVideo && !memberInfo.hasAudio) {
+					//去除没音频没视频的成员
 					closeVideoView(index);
 				}
 			}

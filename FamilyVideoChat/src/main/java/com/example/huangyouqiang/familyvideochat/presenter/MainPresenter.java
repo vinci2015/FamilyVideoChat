@@ -15,8 +15,15 @@ public class MainPresenter {
 	}
 	public void init(){
 		String username = LocalSaveManager.getInstance(AndroidApplication.getContext()).getAccountUserId();
-		String[] friends = {"Jack","Jim","Curry","Vinci","Damn","Trump","Nick","Bruce","Gasol","Nydus"};
+		String[] friends = {"Jack","Jim","Curry","vinci","Damn","Trump","Nick","Bruce","Gasol","Nydus"};
 		this.mainView.initView(username,friends);
+
 	}
 
+	public void showSomeLoading(){
+		mainView.showLoading();
+	}
+	public void hideSomeLoading(){
+		mainView.hideLoading();
+	}
 }

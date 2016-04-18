@@ -6,9 +6,9 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
 import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
@@ -18,7 +18,7 @@ import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.huangyouqiang.familyvideochat.AVManager;
 import com.example.huangyouqiang.familyvideochat.R;
@@ -33,9 +33,6 @@ import com.tencent.av.sdk.AVConstants;
 import com.tencent.av.sdk.AVError;
 import com.tencent.av.sdk.AVView;
 import com.tencent.av.utils.PhoneStatusTools;
-
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class AvActivity extends Activity implements OnClickListener {
 	private static final String TAG = "AvActivity";
@@ -55,7 +52,7 @@ public class AvActivity extends Activity implements OnClickListener {
 	private static final int DIALOG_AT_OFF_EXTERNAL_CAPTURE_FAILED = DIALOG_AT_OFF_EXTERNAL_CAPTURE + 1;
 	private static final int DIALOG_CHANGE_AUTHRITY_OK = DIALOG_AT_OFF_EXTERNAL_CAPTURE_FAILED + 1;
 	private static final int DIALOG_CHANGE_AUTHRITY_FAILED = DIALOG_CHANGE_AUTHRITY_OK + 1;
-	
+	private static final int DIALOG_QUIT = DIALOG_CHANGE_AUTHRITY_FAILED+1;
 	private boolean mIsPaused = false;
 	private int mOnOffCameraErrorCode = AVError.AV_OK;
 	private int mSwitchCameraErrorCode = AVError.AV_OK;
@@ -69,15 +66,14 @@ public class AvActivity extends Activity implements OnClickListener {
 	
 	private ProgressDialog mDialogAtSwitchFrontCamera = null;
 	private ProgressDialog mDialogAtSwitchBackCamera = null;
+	private AlertDialog mDialogQuit = null;
 	private QavsdkControl mQavsdkControl;
+	private AVManager mAVmanager;
 	private String mRecvIdentifier = "";
 	private String mSelfIdentifier = "";
 	OrientationEventListener mOrientationEventListener = null;
 	int mRotationAngle = 0;	
 	private static final int TIMER_INTERVAL = 2000; //2s检查一次
-	private TextView tvTipsMsg;
-	private boolean showTips = false;
-	private TextView tvShowTips;
 	private Context ctx;
 	
 	private ExternalCaptureThread inputStreamThread;
@@ -112,26 +108,7 @@ public class AvActivity extends Activity implements OnClickListener {
 			}
 		}
 	};
-	Timer timer = new Timer();  
-    TimerTask task = new TimerTask(){    
-        public void run() {  
 
-        	runOnUiThread(new Runnable() {
-				public void run() {
-					if (showTips) {
-						if (tvTipsMsg != null) {
-							String strTips = mQavsdkControl.getQualityTips();
-							if (!TextUtils.isEmpty(strTips)) {
-								tvTipsMsg.setText(strTips);				
-							}				
-						}		
-					} else {
-						tvTipsMsg.setText("");		
-					}
-				}
-			});
-        }           
-    }; 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 
 		@Override
@@ -140,12 +117,21 @@ public class AvActivity extends Activity implements OnClickListener {
 			Log.d(TAG, "WL_DEBUG onReceive action = " + action);
 			if (action.equals(Util.ACTION_SURFACE_CREATED)) {
 				locateCameraPreview();
+				boolean isEnable = mAVmanager.getIsEnableCamera();
+				mOnOffCameraErrorCode = mAVmanager.toggleEnableCamera();
+				refreshCameraUI();
+				if (mOnOffCameraErrorCode != AVError.AV_OK) {
+					showDialog(isEnable ? DIALOG_OFF_CAMERA_FAILED : DIALOG_ON_CAMERA_FAILED);
+					mQavsdkControl.setIsInOnOffCamera(false);
+					refreshCameraUI();
+				}
+			//	mMuteCheckable.toggle();
 			} else if (action.equals(Util.ACTION_VIDEO_CLOSE)) {
 				String identifier = intent.getStringExtra(Util.EXTRA_IDENTIFIER);
 				int videoSrcType = intent.getIntExtra(Util.EXTRA_VIDEO_SRC_TYPE, AVView.VIDEO_SRC_TYPE_NONE);
 				mRecvIdentifier = identifier;
 				if (!TextUtils.isEmpty(mRecvIdentifier) && videoSrcType != AVView.VIDEO_SRC_TYPE_NONE) {
-					mQavsdkControl.setRemoteHasVideo(false, mRecvIdentifier, videoSrcType);			
+					mQavsdkControl.setRemoteHasVideo(false, mRecvIdentifier);
 				}
 													
 			} else if (action.equals(Util.ACTION_VIDEO_SHOW)) {
@@ -153,7 +139,7 @@ public class AvActivity extends Activity implements OnClickListener {
 				int videoSrcType = intent.getIntExtra(Util.EXTRA_VIDEO_SRC_TYPE, AVView.VIDEO_SRC_TYPE_NONE);
 				mRecvIdentifier = identifier;	
 				if (!TextUtils.isEmpty(mRecvIdentifier) && videoSrcType != AVView.VIDEO_SRC_TYPE_NONE) {			
-					mQavsdkControl.setRemoteHasVideo(true, mRecvIdentifier, videoSrcType);
+					mQavsdkControl.setRemoteHasVideo(true, mRecvIdentifier);
 				}				
 			} else if (action.equals(Util.ACTION_ENABLE_CAMERA_COMPLETE)) {
 				refreshCameraUI();
@@ -219,13 +205,32 @@ public class AvActivity extends Activity implements OnClickListener {
 					AvActivity.this.setResult(DemoConstants.AUTO_EXIT_ROOM);
 					finish();
 				}
+			}else if(action.equals(Util.ACTION_ACCEPT_COMPLETE)){
+				Toast.makeText(AvActivity.this, "accept", Toast.LENGTH_LONG).show();
+			}else if(action.equals(Util.ACTION_REFUSE_COMPLETE)){
+				Toast.makeText(AvActivity.this, "refuse", Toast.LENGTH_LONG).show();
+				finish();
+			}else if(action.equals(Util.ACTION_INVITE_CONFLICT)){
+				Toast.makeText(AvActivity.this, "对方正在通话中", Toast.LENGTH_LONG).show();
+				removeStickyBroadcast(intent);
+				finish();
+			}else if(action.equals(Util.ACTION_CHAT_HANGUP)){
+				Toast.makeText(AvActivity.this, "对方挂断了视频", Toast.LENGTH_LONG).show();
+				finish();
+			}else if(action.equals(Util.ACTION_PEER_CAMERA_OPEN)){
+				AVManager.getInstance(AndroidApplication.getContext()).setSelfId(mSelfIdentifier);
+				AVManager.getInstance(AndroidApplication.getContext()).setRemoteHasVideo(true, mRecvIdentifier);
+				removeStickyBroadcast(intent);
+			}else if(action.equals(Util.ACTION_PEER_CAMERA_CLOSE)){
+				AVManager.getInstance(AndroidApplication.getContext()).setRemoteHasVideo(false, mRecvIdentifier);
+				removeStickyBroadcast(intent);
 			}
 		}
 	};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		Log.d(TAG, "WL_DEBUG onCreate start");
+		Log.e(TAG, "WL_DEBUG onCreate start");
 		super.onCreate(savedInstanceState);
 		ctx = this;
 		setContentView(R.layout.av_activity);
@@ -239,13 +244,7 @@ public class AvActivity extends Activity implements OnClickListener {
 		recordButton = (Button)findViewById(R.id.qav_bottombar_enable_user_rend);
 		recordButton.setOnClickListener(this);
 		
-		tvTipsMsg = (TextView)findViewById(R.id.qav_tips_msg);
-		tvTipsMsg.setTextColor(Color.RED);
-		tvShowTips = (TextView)findViewById(R.id.qav_show_tips);
-		tvShowTips.setTextColor(Color.GREEN);		
-		tvShowTips.setText(R.string.tips_show);
-		tvShowTips.setOnClickListener(this);
-		timer.schedule(task, TIMER_INTERVAL, TIMER_INTERVAL); 
+
 		// 注册广播
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(Util.ACTION_SURFACE_CREATED);
@@ -256,6 +255,13 @@ public class AvActivity extends Activity implements OnClickListener {
 		intentFilter.addAction(Util.ACTION_SWITCH_CAMERA_COMPLETE);
 		intentFilter.addAction(Util.ACTION_MEMBER_CHANGE);
 		intentFilter.addAction(Util.ACTION_OUTPUT_MODE_CHANGE);
+		intentFilter.addAction(Util.ACTION_REFUSE_COMPLETE);
+		intentFilter.addAction(Util.ACTION_ACCEPT_COMPLETE);
+		intentFilter.addAction(Util.ACTION_INVITE_CANCELED);
+		intentFilter.addAction(Util.ACTION_INVITE_CONFLICT);
+		intentFilter.addAction(Util.ACTION_CHAT_HANGUP);
+		intentFilter.addAction(Util.ACTION_PEER_CAMERA_CLOSE);
+		intentFilter.addAction(Util.ACTION_PEER_CAMERA_OPEN);
 		registerReceiver(mBroadcastReceiver, intentFilter);
 		
 		IntentFilter netIntentFilter = new IntentFilter(); 
@@ -264,6 +270,7 @@ public class AvActivity extends Activity implements OnClickListener {
 
 		//showDialog(DIALOG_INIT);
 
+		mAVmanager = AVManager.getInstance(AndroidApplication.getContext());
 		mQavsdkControl = AVManager.getInstance(AndroidApplication.getContext()).getqavsdkControl();
 	
 		int netType = Util.getNetWorkType(ctx);
@@ -271,16 +278,17 @@ public class AvActivity extends Activity implements OnClickListener {
 		if (netType != AVConstants.NETTYPE_NONE) {
 			mQavsdkControl.setNetType(Util.getNetWorkType(ctx));		
 		}
-		mRecvIdentifier = getIntent().getExtras().getString(Util.EXTRA_IDENTIFIER);
-		mSelfIdentifier = getIntent().getExtras().getString(Util.EXTRA_SELF_IDENTIFIER);
+		mRecvIdentifier = AVManager.getInstance(this).getPeerId();
+		mSelfIdentifier = AVManager.getInstance(AndroidApplication.getContext()).getSelfId();
 		if (mQavsdkControl.getAVContext() != null) {
-			mQavsdkControl.onCreate((AndroidApplication) getApplication(), findViewById(android.R.id.content));
+			mQavsdkControl.onCreate(getApplication(), findViewById(android.R.id.content));
 			findViewById(R.id.qav_bottombar_camera).setVisibility(View.VISIBLE);
 			updateHandfreeButton();
 		} else {
 			finish();
 		}
-		registerOrientationListener();		
+		registerOrientationListener();
+		AVManager.getInstance(AndroidApplication.getContext()).setIsInRoom(true);
 	}
 
 	@Override
@@ -306,7 +314,10 @@ public class AvActivity extends Activity implements OnClickListener {
 		}
         stopOrientationListener();	
 	}
-
+	@Override
+	public void onBackPressed() {
+		showDialog(DIALOG_QUIT);
+	}
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
@@ -319,19 +330,14 @@ public class AvActivity extends Activity implements OnClickListener {
 		if (connectionReceiver != null) { 
 			unregisterReceiver(connectionReceiver); 
 		}	
-		if (timer != null) {
-			task.cancel();
-			timer.cancel();
-			task = null;
-			timer = null;
-		}		
-		Log.e("memoryLeak", "memoryLeak avactivity onDestroy end");			
+		Log.e("memoryLeak", "memoryLeak avactivity onDestroy end");
 		Log.d(TAG, "WL_DEBUG onDestroy");
 		
 		if (inputStreamThread != null) {
 			inputStreamThread.canRun = false;
 			inputStreamThread = null;
 		}
+		AVManager.getInstance(AndroidApplication.getContext()).setIsInRoom(false);
 	}
 
 	private void locateCameraPreview() {
@@ -349,7 +355,8 @@ public class AvActivity extends Activity implements OnClickListener {
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.qav_bottombar_handfree:
-			mQavsdkControl.getAVContext().getAudioCtrl().setAudioOutputMode(mQavsdkControl.getHandfreeChecked() ? AVAudioCtrl.OUTPUT_MODE_SPEAKER : AVAudioCtrl.OUTPUT_MODE_HEADSET);
+			mQavsdkControl.getAVContext().getAudioCtrl()
+							.setAudioOutputMode(mQavsdkControl.getHandfreeChecked() ? AVAudioCtrl.OUTPUT_MODE_SPEAKER : AVAudioCtrl.OUTPUT_MODE_HEADSET);
 			break;
 		case R.id.qav_bottombar_mute:
 			mMuteCheckable.toggle();
@@ -365,6 +372,7 @@ public class AvActivity extends Activity implements OnClickListener {
 			}
 			break;
 		case R.id.qav_bottombar_hangup:
+			mAVmanager.hangUp(mRecvIdentifier);
 			finish();
 			break;
 		case R.id.qav_bottombar_switchcamera:
@@ -377,15 +385,7 @@ public class AvActivity extends Activity implements OnClickListener {
 				refreshCameraUI();
 			}
 			break;
-		case R.id.qav_show_tips:
-			showTips = !showTips;			
-			if (showTips) {
-				tvShowTips.setText(R.string.tips_close);
-			} else {
-				tvShowTips.setText(R.string.tips_show);		
-			}
-			break;				
-			
+
 		case R.id.qav_bottombar_enable_ex:
 			boolean isEnableExternalCapture = mQavsdkControl.getIsEnableExternalCapture();
 			mEnableExternalCaptureErrorCode = mQavsdkControl.enableExternalCapture(!isEnableExternalCapture);
@@ -407,8 +407,6 @@ public class AvActivity extends Activity implements OnClickListener {
 				recordButton.setText(R.string.stop_recording_video);
 			}
 			break;
-			
-			
 		default:
 			break;
 		}
@@ -460,7 +458,35 @@ public class AvActivity extends Activity implements OnClickListener {
 		case DIALOG_SWITCH_BACK_CAMERA_FAILED:
 			dialog = Util.newErrorDialog(this, R.string.switch_back_camera_failed);
 			break;
+		case DIALOG_QUIT:
+				mDialogQuit = new AlertDialog.Builder(this)
+								.setTitle(R.string.quit_tittle)
+								.setPositiveButton(android.R.string.ok,
+												new DialogInterface.OnClickListener() {
+													public void onClick(DialogInterface dialog,
+													                    int whichButton) {
+														AVManager.getInstance(AndroidApplication.getContext()).hangUp(mRecvIdentifier);
+														//	finish();
+													}
+												})
+								.setNegativeButton(android.R.string.cancel,
+												new DialogInterface.OnClickListener() {
+													public void onClick(DialogInterface dialog,
+													                    int whichButton) {
+														dialog.dismiss();
+													}
+												})
+								.setOnCancelListener(
+												new DialogInterface.OnCancelListener() {
 
+													@Override
+													public void onCancel(DialogInterface dialog) {
+														Log.e(TAG, "WL_DEBUG onCancel");
+														dialog.dismiss();
+													}
+												}).create();
+				dialog = mDialogQuit;
+			break;
 		default:
 			break;
 		}
@@ -522,7 +548,6 @@ public class AvActivity extends Activity implements OnClickListener {
 		} else {
 			buttonSwitchCamera.setText(R.string.gaudio_switch_camera_back_acc_txt);
 		}
-
 		if (isInOnOffCamera) {
 			if (isEnable) {
 				Util.switchWaitingDialog(this, mDialogAtOffCamera, DIALOG_AT_OFF_CAMERA, true);
@@ -562,8 +587,6 @@ public class AvActivity extends Activity implements OnClickListener {
 			Util.switchWaitingDialog(this, mDialogAtOffExternalCapture, DIALOG_AT_ON_EXTERNAL_CAPTURE, false);
 		}
 	}
-
-
 
 	private void updateHandfreeButton() {
 		Button button = (Button) findViewById(R.id.qav_bottombar_handfree);
@@ -618,9 +641,6 @@ public class AvActivity extends Activity implements OnClickListener {
 			}
 				
 			mLastOrientation = orientation;
-			
-			
-			
             if (orientation > 314 || orientation < 45) {
                 if (mQavsdkControl != null) {
                 	mQavsdkControl.setRotation(0);

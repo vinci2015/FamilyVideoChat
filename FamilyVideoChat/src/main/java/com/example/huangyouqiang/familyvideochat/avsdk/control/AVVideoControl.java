@@ -45,8 +45,8 @@ public class AVVideoControl {
 	private EnableCameraCompleteCallback mEnableCameraCompleteCallback = new EnableCameraCompleteCallback() {
 		protected void onComplete(boolean enable, int result) {
 			super.onComplete(enable, result);
-			Log.d(TAG, "WL_DEBUG mEnableCameraCompleteCallback.onComplete enable = " + enable);
-			Log.d(TAG, "WL_DEBUG mEnableCameraCompleteCallback.onComplete result = " + result);
+			Log.i(TAG, "WL_DEBUG mEnableCameraCompleteCallback.onComplete enable = " + enable);
+			Log.i(TAG, "WL_DEBUG mEnableCameraCompleteCallback.onComplete result = " + result);
 			mIsInOnOffCamera = false;
 
 			if (result == AVError.AV_OK) {
@@ -95,6 +95,7 @@ public class AVVideoControl {
 	}
 
 	int enableCamera(boolean isEnable) {
+		Log.i(TAG,"enable camera:"+(isEnable?"open":"close"));
 		int result = AVError.AV_OK;
 
 		if (mIsEnableCamera != isEnable) {
@@ -110,8 +111,8 @@ public class AVVideoControl {
 				result = avVideoCtrl.enableCamera(BACK_CAMERA, isEnable, mEnableCameraCompleteCallback);
 			}
 		}
-		Log.d(TAG, "WL_DEBUG enableCamera isEnable = " + isEnable);
-		Log.d(TAG, "WL_DEBUG enableCamera result = " + result);
+		Log.i(TAG, "WL_DEBUG enableCamera isEnable = " + isEnable);
+		Log.i(TAG, "WL_DEBUG enableCamera result = " + result);
 		return result;
 	}
 	

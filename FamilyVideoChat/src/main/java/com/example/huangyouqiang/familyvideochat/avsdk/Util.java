@@ -41,8 +41,51 @@ public class Util {
 	public static int yuvHigh = 240;
 	public static int yuvFormat = 100;
 	public static String outputYuvFilePath = "/sdcard/123";
-	public volatile static long auth_bits = 0;
+	public volatile static long auth_bits = -1;//origin is 0
 
+	/**
+	 * 接收方收到邀请通知
+	 */
+	public static final String ACTION_RECV_INVITE = PACKAGE
+					+ ".ACTION_RECV_INVITE";
+	/**
+	 * 接收方拒绝邀请完成通知
+	 */
+	public static final String ACTION_REFUSE_COMPLETE = PACKAGE
+					+ ".ACTION_REFUSE_COMPLETE";
+	/**
+	 * 发起方取消邀请通知
+	 */
+	public static final String ACTION_INVITE_CANCELED = PACKAGE
+					+ ".ACTION_INVITE_CANCELED";
+	/**
+	 * 接收方接受邀请完成通知
+	 */
+	public static final String ACTION_ACCEPT_COMPLETE = PACKAGE
+					+ ".ACTION_ACCEPT_COMPLETE";
+	/**
+	 * StartContextService被杀死通知
+	 */
+	public static final String ACTION_SERVICE_DESTROYED = PACKAGE
+					+".ACTION_SERVICE_DESTROYED";
+	/**
+	 * 邀请冲突
+	 */
+	public static final String ACTION_INVITE_CONFLICT = PACKAGE
+					+".ACTION_INVITE_CONFLICT";
+	/**
+	 *视频挂断
+	 */
+	public static final String ACTION_CHAT_HANGUP = PACKAGE
+					+".ACTION_CHAT_HANGUP";
+	/**
+	 * 收到监听请求
+	 */
+	public static final String ACTION_RECEIVE_MONITOR = PACKAGE
+					+".ACTION_RECEIVE_MONITOR";
+
+	public static final String ACTION_START_CONTEXT_FAILED = PACKAGE
+					+".ACTION_START_CONTEXT_FAILED";
 	public static final String ACTION_START_CONTEXT_COMPLETE = PACKAGE
 			+ ".ACTION_START_CONTEXT_COMPLETE";
 	public static final String ACTION_CLOSE_CONTEXT_COMPLETE = PACKAGE
@@ -67,6 +110,10 @@ public class Util {
 			+ ".ACTION_OUTPUT_MODE_CHANGE";
 	public static final String ACTION_ENABLE_EXTERNAL_CAPTURE_COMPLETE = PACKAGE
 			+ ".ACTION_ENABLE_EXTERNAL_CAPTURE_COMPLETE";
+	public static final String ACTION_PEER_CAMERA_OPEN = PACKAGE
+					+".ACTION_PEER_CAMERA_OPEN";
+	public static final String ACTION_PEER_CAMERA_CLOSE = PACKAGE
+					+".ACTION_PEER_CAMERA_CLOSE";
 
 	public static final String ACTION_CHANGE_AUTHRITY = PACKAGE
 			+ ".ACTION_CHANGE_AUTHRITY";
@@ -319,8 +366,18 @@ public class Util {
         } 
         
     	return AVConstants.NETTYPE_NONE;	
-    }  
-    
+    }
+	/*
+	* 生成随机6位房间号
+	*/
+	public static int getRandomNumber(){
+		String str = "";
+		for(int i = 0;i<6;i++){
+			int e = (int) (Math.random()*10);
+			str  = str + e;
+		}
+		return Integer.parseInt(str);
+	}
     /*
      * 获取网络类型
      */

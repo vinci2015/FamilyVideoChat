@@ -23,6 +23,7 @@ import butterknife.InjectView;
  * Created by huangyouqiang on 2016/4/5.
  */
 public class BaseActivity extends AppCompatActivity implements BaseView{
+	private static final String TAG = BaseActivity.class.getSimpleName();
 	@InjectView(R.id.rl_progress)
 	RelativeLayout progress;
 	@Override

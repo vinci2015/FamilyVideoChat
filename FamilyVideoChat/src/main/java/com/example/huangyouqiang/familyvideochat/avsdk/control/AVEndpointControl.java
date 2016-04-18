@@ -267,4 +267,31 @@ class AVEndpointControl {
 		
 		return false;
 	}
+
+	/**
+	 * 打开某人的画面
+	 * @param identifier
+	 */
+	/*void requestRemoteView(String identifier){
+		QavsdkControl qavsdkControl = AVManager.getInstance(AndroidApplication.getContext()).getqavsdkControl();
+		AVEndpoint endpoint = ((AVRoomMulti) qavsdkControl.getRoom()).getEndpointById(identifier);
+		if(endpoint == null){
+			Toast.makeText(mContext, R.string.avendpoint_is_null, Toast.LENGTH_LONG).show();
+			return;
+		}
+		AVView view = new AVView();
+		view.videoSrcType = AVView.VIDEO_SRC_TYPE_CAMERA;
+		view.viewSizeType = AVView.VIEW_SIZE_TYPE_BIG;
+		AVEndpoint.View view = new AVEndpoint.View();
+		view.videoSrcType = AVEndpoint.View.VIDEO_SRC_TYPE_CAMERA;
+		view.viewSizeType = AVEndpoint.View.VIEW_SIZE_TYPE_BIG;
+
+		endpoint.requestView(view, mRequestViewCompleteCallback);
+		mContext.sendBroadcast(new Intent(
+						Util.ACTION_VIDEO_SHOW).putExtra(
+						Util.EXTRA_IDENTIFIER, identifier).putExtra(
+						Util.EXTRA_VIDEO_SRC_TYPE, view.videoSrcType));
+		mRemoteHasVideo = true;
+		mRemoteVideoIdentifier = identifier;
+	}*/
 }
