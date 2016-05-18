@@ -276,7 +276,7 @@ class AVEndpointControl {
 		QavsdkControl qavsdkControl = AVManager.getInstance(AndroidApplication.getContext()).getqavsdkControl();
 		AVEndpoint endpoint = ((AVRoomMulti) qavsdkControl.getRoom()).getEndpointById(identifier);
 		if(endpoint == null){
-			Toast.makeText(mContext, R.string.avendpoint_is_null, Toast.LENGTH_LONG).show();
+			Toast.makeText(mContext, r.string.avendpoint_is_null, Toast.LENGTH_LONG).show();
 			return;
 		}
 		AVView view = new AVView();

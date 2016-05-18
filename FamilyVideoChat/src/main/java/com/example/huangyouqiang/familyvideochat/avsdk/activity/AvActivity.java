@@ -239,10 +239,7 @@ public class AvActivity extends Activity implements OnClickListener {
 		findViewById(R.id.qav_bottombar_camera).setOnClickListener(this);
 		findViewById(R.id.qav_bottombar_hangup).setOnClickListener(this);
 		findViewById(R.id.qav_bottombar_switchcamera).setOnClickListener(this);
-		findViewById(R.id.qav_bottombar_enable_ex).setOnClickListener(this);
-		
-		recordButton = (Button)findViewById(R.id.qav_bottombar_enable_user_rend);
-		recordButton.setOnClickListener(this);
+
 		
 
 		// 注册广播
@@ -341,7 +338,7 @@ public class AvActivity extends Activity implements OnClickListener {
 	}
 
 	private void locateCameraPreview() {
-//		SurfaceView localVideo = (SurfaceView) findViewById(R.id.av_video_surfaceView);
+//		SurfaceView localVideo = (SurfaceView) findViewById(r.id.av_video_surfaceView);
 //		MarginLayoutParams params = (MarginLayoutParams) localVideo.getLayoutParams();
 //		params.leftMargin = -3000;
 //		localVideo.setLayoutParams(params);
@@ -386,27 +383,8 @@ public class AvActivity extends Activity implements OnClickListener {
 			}
 			break;
 
-		case R.id.qav_bottombar_enable_ex:
-			boolean isEnableExternalCapture = mQavsdkControl.getIsEnableExternalCapture();
-			mEnableExternalCaptureErrorCode = mQavsdkControl.enableExternalCapture(!isEnableExternalCapture);
-			refreshCameraUI();
-			if (mEnableExternalCaptureErrorCode != AVError.AV_OK) {
-				showDialog(isEnableExternalCapture ? DIALOG_AT_OFF_EXTERNAL_CAPTURE_FAILED : DIALOG_AT_ON_EXTERNAL_CAPTURE_FAILED);
-				mQavsdkControl.setIsOnOffExternalCapture(false);
-				refreshCameraUI();
-			}
-			break;
 			
-		case R.id.qav_bottombar_enable_user_rend:	
-			if (mQavsdkControl.enableUserRender(!isUserRendEnable)) {
-				isUserRendEnable = !isUserRendEnable;
-			}
-			if (isUserRendEnable) {
-				recordButton.setText(R.string.start_recording_video);
-			} else {
-				recordButton.setText(R.string.stop_recording_video);
-			}
-			break;
+
 		default:
 			break;
 		}
@@ -522,16 +500,7 @@ public class AvActivity extends Activity implements OnClickListener {
 		boolean isInSwitchCamera = mQavsdkControl.getIsInSwitchCamera();
 		Button buttonEnableCamera = (Button) findViewById(R.id.qav_bottombar_camera);
 		Button buttonSwitchCamera = (Button) findViewById(R.id.qav_bottombar_switchcamera);
-		Button external_capture_status = (Button)findViewById(R.id.qav_bottombar_enable_ex);
-		boolean isExternalCaptureEnable = mQavsdkControl.getIsEnableExternalCapture();
-		boolean isOnOffExternalCapture = mQavsdkControl.getIsInOnOffExternalCapture();
-		if (isExternalCaptureEnable) {
-			external_capture_status.setSelected(true);
-			external_capture_status.setText(R.string.video_close_external_acc_txt);
-		} else {
-			external_capture_status.setSelected(false);
-			external_capture_status.setText(R.string.video_open_external_acc_txt);
-		}
+
 		
 		if (isEnable) {
 			buttonEnableCamera.setSelected(true);
@@ -572,19 +541,6 @@ public class AvActivity extends Activity implements OnClickListener {
 		} else {
 			Util.switchWaitingDialog(this, mDialogAtSwitchBackCamera, DIALOG_AT_SWITCH_BACK_CAMERA, false);
 			Util.switchWaitingDialog(this, mDialogAtSwitchFrontCamera, DIALOG_AT_SWITCH_FRONT_CAMERA, false);
-		}
-		
-		if (isOnOffExternalCapture) {
-			if (isEnable) {
-				Util.switchWaitingDialog(this, mDialogAtOnExternalCapture, DIALOG_AT_OFF_EXTERNAL_CAPTURE, true);
-				Util.switchWaitingDialog(this, mDialogAtOffExternalCapture, DIALOG_AT_ON_EXTERNAL_CAPTURE, false);
-			} else {
-				Util.switchWaitingDialog(this, mDialogAtOnExternalCapture, DIALOG_AT_OFF_EXTERNAL_CAPTURE, false);
-				Util.switchWaitingDialog(this, mDialogAtOffExternalCapture, DIALOG_AT_ON_EXTERNAL_CAPTURE, true);
-			}
-		} else {
-			Util.switchWaitingDialog(this, mDialogAtOnExternalCapture, DIALOG_AT_OFF_EXTERNAL_CAPTURE, false);
-			Util.switchWaitingDialog(this, mDialogAtOffExternalCapture, DIALOG_AT_ON_EXTERNAL_CAPTURE, false);
 		}
 	}
 

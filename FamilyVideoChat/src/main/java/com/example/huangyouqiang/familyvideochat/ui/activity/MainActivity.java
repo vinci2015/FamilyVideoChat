@@ -12,6 +12,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -19,6 +21,7 @@ import android.widget.TextView;
 
 import com.example.huangyouqiang.familyvideochat.LocalSaveManager;
 import com.example.huangyouqiang.familyvideochat.R;
+import com.example.huangyouqiang.familyvideochat.UserModel;
 import com.example.huangyouqiang.familyvideochat.avsdk.Util;
 import com.example.huangyouqiang.familyvideochat.common.DividerItemDecoration;
 import com.example.huangyouqiang.familyvideochat.common.adapter.FriendListAdapter;
@@ -28,6 +31,9 @@ import com.example.huangyouqiang.familyvideochat.ui.Navigate;
 import com.example.huangyouqiang.familyvideochat.ui.fragment.MainFragment;
 import com.example.huangyouqiang.familyvideochat.ui.fragment.MainFragment.OnFragmentInteractionListener;
 import com.example.huangyouqiang.familyvideochat.view.MainView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -43,6 +49,7 @@ public class MainActivity extends BaseActivity implements OnFragmentInteractionL
 	private ActionBarDrawerToggle drawerToggle;
 	private RecyclerView recyclerView;
 	private MainPresenter mainPresenter;
+	private FriendListAdapter friendListAdapter;
 
 	@Override
 	public void onDeliverMessage(String msg) {
@@ -86,9 +93,27 @@ public class MainActivity extends BaseActivity implements OnFragmentInteractionL
 	}
 
 	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.menu_main,menu);
+		return true;
+	}
+
+	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		Log.i(TAG,"on activity result");
-		getFragment(TAG_MainFragment).onActivityResult(requestCode,resultCode,data);
+		Log.i(TAG,"on activity result, requestCode :"+requestCode+" resultCode :"+resultCode);
+		if(requestCode == 0) {
+			getFragment(TAG_MainFragment).onActivityResult(requestCode, resultCode, data);
+		}else if(requestCode == 1){
+			if(resultCode == 9){
+				return;
+			}else if(resultCode == 1){
+				//// TODO: 2016/5/17  update friend list adapter t
+				ArrayList<UserModel> friendList = data.getParcelableArrayListExtra("friends");
+				for (UserModel friend : friendList) {
+					friendListAdapter.addItem(friend);
+				}
+			}
+		}
 	}
 
 	@Override
@@ -98,18 +123,30 @@ public class MainActivity extends BaseActivity implements OnFragmentInteractionL
 	}
 
 	@Override
-	public void initView(String username,String[] friends) {
+	public void initView(String username,List<UserModel> friends) {
 		TextView drawerUsername = (TextView) navigationView.findViewById(R.id.tv_drawer_username);
 		drawerUsername.setText(username);
-		Button clearAcountButton = (Button) navigationView.findViewById(R.id.btn_clear_account);
-		clearAcountButton.setOnClickListener(new View.OnClickListener() {
+		Button clearAccountButton = (Button) navigationView.findViewById(R.id.btn_clear_account);
+		clearAccountButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				LocalSaveManager.getInstance(AndroidApplication.getContext()).clearAccountInfo();
+				mainPresenter.logout();
 				Navigate.build().navigateTo(LoginActivity.class).start();
 			}
 		});
 		setSupportActionBar(toolbar);
+		toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+			@Override
+			public boolean onMenuItemClick(MenuItem item) {
+				switch (item.getItemId()){
+					case R.id.action_add_friend:
+						startActivityForResult(new Intent(MainActivity.this,AddFriendActivity.class),1);
+						break;
+				}
+				return false;
+			}
+		});
 		drawerToggle = new ActionBarDrawerToggle(this,drawerLayout,toolbar,R.string.drawer_open, R.string.drawer_close);
 		drawerToggle.syncState();
 		drawerLayout.addDrawerListener(drawerToggle);
@@ -117,15 +154,15 @@ public class MainActivity extends BaseActivity implements OnFragmentInteractionL
 		recyclerView = (RecyclerView) navigationView.findViewById(R.id.recycle_view);
 		recyclerView.setLayoutManager(new LinearLayoutManager(this));
 		recyclerView.setHasFixedSize(true);
-		FriendListAdapter adapter = new FriendListAdapter(friends);
-		adapter.setItemClickListener(new FriendListAdapter.RecycleItemClickListener() {
+		friendListAdapter = new FriendListAdapter(friends);
+		friendListAdapter.setItemClickListener(new FriendListAdapter.RecycleItemClickListener() {
 			@Override
 			public void onItemClick(View view, String data) {
 				drawerLayout.closeDrawers();
 				((MainFragment)getFragment(TAG_MainFragment)).setToPerson(data);
 			}
 		});
-		recyclerView.setAdapter(adapter);
+		recyclerView.setAdapter(friendListAdapter);
 		recyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayout.VERTICAL));
 
 		IntentFilter filter = new IntentFilter();

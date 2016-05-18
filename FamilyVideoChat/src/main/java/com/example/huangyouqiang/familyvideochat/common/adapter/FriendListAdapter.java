@@ -8,14 +8,18 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.huangyouqiang.familyvideochat.R;
+import com.example.huangyouqiang.familyvideochat.UserModel;
+
+import java.util.List;
 
 /**
  * Created by huangyouqiang on 2016/4/7.
  */
-public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.ViewHolder>  implements View.OnClickListener{
+public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.ViewHolder>
+				implements View.OnClickListener{
 
-	private String[] datas = null;
-	public FriendListAdapter(String[] datas){
+	private List<UserModel> datas = null;
+	public FriendListAdapter(List<UserModel> datas){
 		this.datas = datas;
 	}
 	private RecycleItemClickListener recycleItemClickListener = null;
@@ -32,26 +36,26 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
 
 	@Override
 	public void onBindViewHolder(final ViewHolder holder, int position) {
-			holder.friend.setText(datas[position]);
+			holder.friend.setText(datas.get(position).getDisplayName());
 			holder.change.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					holder.change.setText("YES");
 				}
 			});
-			holder.itemView.setTag(datas[position]);
+			holder.itemView.setTag(datas.get(position));
 		holder.itemView.setBackgroundResource(R.drawable.friends_item_bg);
 	}
 
 	@Override
 	public int getItemCount() {
-		return datas.length;
+		return datas.size();
 	}
 
 	@Override
 	public void onClick(View v) {
 		if(recycleItemClickListener != null){
-			recycleItemClickListener.onItemClick(v,(String)v.getTag());
+			recycleItemClickListener.onItemClick(v,((UserModel)v.getTag()).getUserId());
 		}
 	}
 
@@ -66,5 +70,9 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
 			friend = (TextView) itemView.findViewById(R.id.tv_friend);
 			change = (Button) itemView.findViewById(R.id.btn_edit);
 		}
+	}
+	public void addItem(UserModel userModel){
+		datas.add(userModel);
+		notifyDataSetChanged();
 	}
 }

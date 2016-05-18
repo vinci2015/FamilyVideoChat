@@ -10,6 +10,7 @@
         android:id="@+id/tv_drawer_username"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:layout_alignParentBottom="true"
         android:text="@string/app_name"/>
 
@@ -19,7 +20,7 @@
         android:layout_height="72dp"
         android:layout_above="@id/tv_drawer_username"
         android:layout_marginBottom="16dp"
-        android:src="@mipmap/ic_launcher"/>
+        android:src="@drawable/laugh_96"/>
     <Button
         android:id="@+id/btn_clear_account"
         android:layout_width="wrap_content"

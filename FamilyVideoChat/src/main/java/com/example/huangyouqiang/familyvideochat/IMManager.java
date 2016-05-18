@@ -57,7 +57,7 @@ public class IMManager {
 	}
 
 	public void init(){
-		mTIMManager.setEnv(1);
+		mTIMManager.setEnv(0);
 		mTIMManager.addMessageListener(new TIMMessageListener() {
 			@Override
 			public boolean onNewMessages(List<TIMMessage> list) {
@@ -139,6 +139,19 @@ public class IMManager {
 		});
 	}
 
+	public void logout(){
+		mTIMManager.logout(new TIMCallBack() {
+			@Override
+			public void onError(int i, String s) {
+				Log.i(TAG,"logout error :"+s);
+			}
+
+			@Override
+			public void onSuccess() {
+				Log.i(TAG,"logout success");
+			}
+		});
+	}
 	TLSRefreshUserSigListener refreshSigListener = new TLSRefreshUserSigListener() {
 		@Override
 		public void OnRefreshUserSigSuccess(TLSUserInfo tlsUserInfo) {

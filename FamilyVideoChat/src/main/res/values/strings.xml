@@ -1,7 +1,12 @@
 <resources>
-    <string name="app_name">TencentTest01</string>
-    <string name="action_settings">Settings</string>
-    <string name="login">Login</string>
+    <string name="app_name">亲友音视频</string>
+    <string name="action_settings">设置</string>
+    <string name="login">登录</string>
+    <string name="register">注册</string>
+    <string name="add_friend">加好友</string>
+    <string name="video_call">视频邀请</string>
+    <string name="audio_call">语音邀请</string>
+    <string name="text_call">文字聊天</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_register">RegisterActivity</string>
     <string name="drawer_open">open</string>

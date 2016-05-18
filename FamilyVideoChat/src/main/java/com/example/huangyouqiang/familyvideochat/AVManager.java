@@ -492,7 +492,7 @@ public class AVManager implements AVChatStartContextCallBack{
 					Log.i(TAG, " message sent time :"+msg.timestamp()+"  now time :"+currentTime);
 					long timeInterval = currentTime-msg.timestamp();
 					if(msg.isSelf()||timeInterval >=30){
-						Log.i(TAG, "this message is sent from  "+timeInterval+" seconds ago. content :"+((TIMTextElem)msg.getElement(0)).getText());
+					//	Log.i(TAG, "this message is sent from  "+timeInterval+" seconds ago. content :"+((TIMTextElem)msg.getElement(0)).getText());
 						
 						break;
 					}
@@ -503,67 +503,70 @@ public class AVManager implements AVChatStartContextCallBack{
 					
 					//text
 					if(type == TIMElemType.Text){
-						TIMTextElem textElem1 = (TIMTextElem) msg.getElement(0);
-						TIMTextElem textElem2 = (TIMTextElem) msg.getElement(1);
-						int commandId = Integer.parseInt(textElem1.getText());
-						String content = textElem2.getText();
-						Log.i(TAG, "messagelistener --- content : "+content);
-					//	Intent intent = null;
-						
-						switch (commandId) {
-							case -1://commandId = -1表示非音视频命令
-								Log.i(TAG, content);
-								break;
-							case 0://commandId = 0 表示视频邀请,则content表示视频房间号
-									if(getIsInRoom()){
-										conflict(peerId);
-									}else{
-										int relationId = Integer.parseInt(content);
-										onReceiveInvite(peerId, relationId);
-				//					intent = new Intent(Util.ACTION_RECV_INVITE).putExtra("peerId", peerId)
-				//																		   .putExtra("relationId", relationId);
-									}
-								break;
-							case 1://commandId = 1 表示接收方拒绝了视频邀请，content无意
-									onReceiveRefuse(peerId);
-									//intent = new Intent(Util.ACTION_REFUSE_COMPLETE);
-								break;
-							case 2://commandId = 2 表示接收方接受了视频邀请，content无意
-									onReceiveAccept(peerId);
-									//intent = new Intent(Util.ACTION_ACCEPT_COMPLETE);
-								break;
-							case 3://commandId = 3表示发起方取消了视频邀请，content无意
-									onReceiveInviteCancel(peerId);
-									//intent = new Intent(Util.ACTION_INVITE_CANCELED);
-								break;
-							case 4://commandId = 4表示通话冲突，不能同时接受1个以上邀请
-									onReceiveConflict(peerId);
-									//intent = new Intent(Util.ACTION_INVITE_CONFLICT);
-								break;
-							case 5://commandId = 5表示对方挂断了视频
-									onReceiveHangUp(peerId);
-									//intent = new Intent(Util.ACTION_CHAT_HANGUP);
-								break;
-							case 6://commandId = 6表示收到监 控请求
-								if(getIsInRoom()){
-									conflict(peerId);
-								}else{
-									onReceiveMonitor(peerId, Integer.parseInt(content));
-								}
-								break;
-						default:
-							Log.i(TAG, "receive message : "+commandId);
-							break;
-						}
-					/*	if(intent != null){
-							context.sendBroadcast(intent);
-						}*/
+						onReceiveText(msg,peerId);
 						conversation.setReadMessage(msg);
+					}
+					else if(type == TIMElemType.SNSTips){
+						Log.i(TAG,"receive snsTips");
 					}
 				}				
 			return false;
 		}
 	};
+	private void onReceiveText(TIMMessage msg,String peerId){
+		TIMTextElem textElem1 = (TIMTextElem) msg.getElement(0);
+		TIMTextElem textElem2 = (TIMTextElem) msg.getElement(1);
+		int commandId = Integer.parseInt(textElem1.getText());
+		String content = textElem2.getText();
+		Log.i(TAG, "messagelistener --- content : "+content);
+		//	Intent intent = null;
+
+		switch (commandId) {
+			case -1://commandId = -1表示非音视频命令
+				Log.i(TAG, content);
+				break;
+			case 0://commandId = 0 表示视频邀请,则content表示视频房间号
+				if(getIsInRoom()){
+					conflict(peerId);
+				}else{
+					int relationId = Integer.parseInt(content);
+					onReceiveInvite(peerId, relationId);
+					//					intent = new Intent(Util.ACTION_RECV_INVITE).putExtra("peerId", peerId)
+					//																		   .putExtra("relationId", relationId);
+				}
+				break;
+			case 1://commandId = 1 表示接收方拒绝了视频邀请，content无意
+				onReceiveRefuse(peerId);
+				//intent = new Intent(Util.ACTION_REFUSE_COMPLETE);
+				break;
+			case 2://commandId = 2 表示接收方接受了视频邀请，content无意
+				onReceiveAccept(peerId);
+				//intent = new Intent(Util.ACTION_ACCEPT_COMPLETE);
+				break;
+			case 3://commandId = 3表示发起方取消了视频邀请，content无意
+				onReceiveInviteCancel(peerId);
+				//intent = new Intent(Util.ACTION_INVITE_CANCELED);
+				break;
+			case 4://commandId = 4表示通话冲突，不能同时接受1个以上邀请
+				onReceiveConflict(peerId);
+				//intent = new Intent(Util.ACTION_INVITE_CONFLICT);
+				break;
+			case 5://commandId = 5表示对方挂断了视频
+				onReceiveHangUp(peerId);
+				//intent = new Intent(Util.ACTION_CHAT_HANGUP);
+				break;
+			case 6://commandId = 6表示收到监 控请求
+				if(getIsInRoom()){
+					conflict(peerId);
+				}else{
+					onReceiveMonitor(peerId, Integer.parseInt(content));
+				}
+				break;
+			default:
+				Log.i(TAG, "receive message : "+commandId);
+				break;
+		}
+	}
 	/**
 	 * 设置自己的id
 	 * @param selfId

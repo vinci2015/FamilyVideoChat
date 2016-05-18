@@ -7,4 +7,11 @@
         android:orderInCategory="100"
         android:title="@string/action_settings"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_add_friend"
+        android:title="@string/add_friend"
+        android:orderInCategory="90"
+        app:showAsAction="always"
+        android:icon="@drawable/add_user_64"
+        />
 </menu>

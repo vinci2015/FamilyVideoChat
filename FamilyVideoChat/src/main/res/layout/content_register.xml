@@ -23,7 +23,7 @@
             android:id="@+id/edt_username"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableLeft="@android:drawable/ic_input_get"
+            android:drawableLeft="@drawable/user_64"
             android:inputType="text"
             android:hint="username"
             />
@@ -42,7 +42,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPassword"
-            android:drawableLeft="@android:drawable/ic_delete"
+            android:drawableLeft="@drawable/password_64"
             android:hint="password"
             />
     </android.support.design.widget.TextInputLayout>
@@ -56,6 +56,8 @@
         android:background="@color/colorAccent"
         style="@style/Base.Widget.AppCompat.Button"
         android:elevation="8dp"
-        android:text="REGISTER"
+        android:text="@string/register"
+        android:textColor="#fff"
+        android:textSize="20sp"
         android:layout_centerHorizontal="true"/>
 </RelativeLayout>

@@ -24,15 +24,24 @@
         android:layout_margin="15dp"
         card_view:cardBackgroundColor="@color/grey"
         android:layout_gravity="center_horizontal"
+        android:paddingBottom="20dp"
+        android:paddingTop="20dp"
         card_view:cardCornerRadius="20dp"
         card_view:cardElevation="24dp">
         <ImageView
             android:id="@+id/iv_video"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="10dp"
+            android:layout_gravity="center"
+            android:src="@drawable/video_call_fit"/>
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="5dp"
             android:layout_gravity="center"
-            android:src="@drawable/one_key_home"/>
+            android:layout_marginTop="40dp"
+            android:text="@string/video_call"
+            android:textColor="#fff"/>
     </android.support.v7.widget.CardView>
     <android.support.v7.widget.CardView
         android:id="@+id/cv_audio"
@@ -47,11 +56,18 @@
         card_view:cardElevation="24dp">
         <ImageView
             android:id="@+id/iv_audio"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="10dp"
+            android:layout_gravity="center"
+            android:src="@drawable/audio_call"/>
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="5dp"
             android:layout_gravity="center"
-            android:src="@drawable/monitoring"/>
+            android:layout_marginTop="41dp"
+            android:text="@string/video_call"
+            android:textColor="#fff"/>
     </android.support.v7.widget.CardView>
     <android.support.v7.widget.CardView
         android:id="@+id/cv_message"
@@ -66,10 +82,17 @@
         card_view:cardElevation="24dp">
         <ImageView
             android:id="@+id/iv_message"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="10dp"
+            android:layout_gravity="center"
+            android:src="@drawable/text_call_fit"/>
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="5dp"
             android:layout_gravity="center"
-            android:src="@drawable/one_key_home"/>
+            android:layout_marginTop="38dp"
+            android:text="@string/text_call"
+            android:textColor="#fff"/>
     </android.support.v7.widget.CardView>
 </LinearLayout>

@@ -629,7 +629,7 @@ public class AVUIControl extends GLViewGroup {
 		}
 		mGlRootView.setContentPane(this);
 		// set bitmap ,reuse the backgroud BitmapDrawable,mlzhong
-		// setBackground(UITools.getBitmapFromResourceId(mContext, R.drawable.qav_gaudio_bg));
+		// setBackground(UITools.getBitmapFromResourceId(mContext, r.drawable.qav_gaudio_bg));
 
 		mScaleGestureDetector = new ScaleGestureDetector(mContext, new ScaleGestureListener());
 		mGestureDetector = new GestureDetector(mContext, new GestureListener());
@@ -642,7 +642,7 @@ public class AVUIControl extends GLViewGroup {
 
 	void initCameraPreview() {
 		
-//		SurfaceView localVideo = (SurfaceView) mRootView.findViewById(R.id.av_video_surfaceView);
+//		SurfaceView localVideo = (SurfaceView) mRootView.findViewById(r.id.av_video_surfaceView);
 //		SurfaceHolder holder = localVideo.getHolder();
 //		holder.addCallback(mSurfaceHolderListener);
 //		holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);// 3.0以下必须在初始化时调用，否则不能启动预览
@@ -656,7 +656,7 @@ public class AVUIControl extends GLViewGroup {
                 | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN; //让window占满整个屏幕，不留边界
         // layoutParams.flags |= LayoutParams.FLAG_NOT_TOUCHABLE;
         layoutParams.format = PixelFormat.TRANSLUCENT;
-        layoutParams.windowAnimations = 0;// android.R.style.Animation_Toast;
+        layoutParams.windowAnimations = 0;// android.r.style.Animation_Toast;
         layoutParams.type = WindowManager.LayoutParams.TYPE_TOAST;
         layoutParams.gravity = Gravity.LEFT | Gravity.TOP;
         //layoutParams.setTitle("Toast");

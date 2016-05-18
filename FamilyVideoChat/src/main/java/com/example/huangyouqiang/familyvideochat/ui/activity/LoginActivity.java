@@ -53,7 +53,7 @@ public class LoginActivity extends BaseActivity implements LoginView{
 
 	@Override
 	public void initView(UserModel userModel) {
-		toolbar.setTitle("LOGIN");
+		toolbar.setTitle("登录");
 		setSupportActionBar(toolbar);
 		String userId = userModel.getUserId();
 		if(userId != ""){

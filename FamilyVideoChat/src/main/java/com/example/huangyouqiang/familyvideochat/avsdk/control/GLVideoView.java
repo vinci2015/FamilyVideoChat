@@ -640,7 +640,7 @@ public class GLVideoView extends GLView {
 			mLoading = loading;
 			if (loading) {
 				if (mLoadingTexture == null) {
-					// mLoadingTexture = new ResourceTexture(mContext, R.drawable.qav_video_loading);
+					// mLoadingTexture = new ResourceTexture(mContext, r.drawable.qav_video_loading);
 				}
 				GLRootView view = getGLRootView();
 				if (view != null)
